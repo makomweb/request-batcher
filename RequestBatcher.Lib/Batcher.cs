@@ -62,26 +62,10 @@ namespace RequestBatcher.Lib
             return _batch.Id;
         }
 
-        public BatchResponse Query(Guid batchId)
+        public BatchProcessResult Query(Guid batchId)
         {
             var t = _processor.Query(batchId);
-
-            if (t.IsFaulted)
-            {
-                throw new Exception("Has faulted!", t.Exception);
-            }
-
-            if (t.IsCanceled)
-            {
-                throw new Exception("Was canceled.");
-            }
-
-            if (t.IsCompleted)
-            {
-                return t.Result;
-            }
-
-            throw new Exception($"Status is '{t.Status}'.");
+            return new BatchProcessResult(t);
         }
     }
 
@@ -101,6 +85,48 @@ namespace RequestBatcher.Lib
 
     public class BatchResponse { }
 
+    public class BatchProcessResult
+    {
+        private readonly Task<BatchResponse> _task;
+
+        public BatchProcessResult(Task<BatchResponse> task)
+        {
+            _task = task;
+        }
+
+        public bool IsCompleted => _task.IsCompleted;
+
+        public TaskStatus Status => _task.Status;
+
+        public BatchResponse Value
+        {
+            get
+            {
+                if (_task.IsFaulted)
+                {
+                    throw new Exception("Has faulted!", _task.Exception);
+                }
+
+                if (_task.IsCanceled)
+                {
+                    throw new Exception("Was canceled.");
+                }
+
+                if (_task.IsCompleted)
+                {
+                    return _task.Result;
+                }
+
+                throw new Exception($"Status is '{_task.Status}'.");
+            }
+        }
+
+        public Task<BatchResponse> GetValueAsync()
+        {
+            return _task;
+        }
+    }
+
     public class BatchProcessor<T>
     {
         private readonly Dictionary<BatchRequest<T>, Task<BatchResponse>> _tasks = new Dictionary<BatchRequest<T>, Task<BatchResponse>>();
@@ -110,7 +136,6 @@ namespace RequestBatcher.Lib
             var r = new BatchRequest<T>(batch);
             var t = ProcessAsync(r);
             _tasks.Add(r, t);
-            //t.Start();
         }
 
         private async Task<BatchResponse> ProcessAsync(BatchRequest<T> request)

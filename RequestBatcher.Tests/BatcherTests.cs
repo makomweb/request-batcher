@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using RequestBatcher.Lib;
+using System.Threading.Tasks;
 
 namespace RequestBatcher.Tests
 {
@@ -22,7 +23,7 @@ namespace RequestBatcher.Tests
         }
         
         [Test]
-        public void If_batch_is_full_it_should_be_processed()
+        public async Task If_batch_is_full_it_should_be_processed()
         {
             var batcher = new Batcher<string>();
             var one = batcher.Add("one");
@@ -30,7 +31,11 @@ namespace RequestBatcher.Tests
             var three = batcher.Add("three");
 
             var result = batcher.Query(one);
-            Assert.NotNull(result);
+            Assert.IsFalse(result.IsCompleted, "Status should not be completed!");
+
+            await result.GetValueAsync();
+            Assert.IsTrue(result.IsCompleted, "Status should be completed now!");
+            Assert.IsInstanceOf<BatchResponse>(result.Value, "Value should be of type 'BatchResponse'!");
         }
     }
 }

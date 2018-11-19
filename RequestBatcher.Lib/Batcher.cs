@@ -62,4 +62,22 @@ namespace RequestBatcher.Lib
 
         private bool IsBatchFull => _batch.IsFull;
     }
+
+    public class BatchRequest
+    {
+
+    }
+
+    public class BatchResponse
+    {
+
+    }
+
+    public class BatchProcessor
+    {
+        public BatchResponse Process(BatchRequest request)
+        {
+            return new BatchResponse();
+        }
+    }
 }

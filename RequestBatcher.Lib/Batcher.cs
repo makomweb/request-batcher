@@ -50,7 +50,7 @@ namespace RequestBatcher.Lib
 
         public Guid Add(T item)
         {
-            if (IsBatchFull)
+            if (_batch.IsFull)
             {
                 _batches.Add(_batch.Id, _batch);
                 _batch = new Batch<T>(_maxItemsPerBatch);
@@ -59,8 +59,6 @@ namespace RequestBatcher.Lib
             _batch.Add(item);
             return _batch.Id;
         }
-
-        private bool IsBatchFull => _batch.IsFull;
     }
 
     public class BatchRequest

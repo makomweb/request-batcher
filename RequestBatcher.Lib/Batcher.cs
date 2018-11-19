@@ -17,9 +17,18 @@ namespace RequestBatcher.Lib
 
         public Guid Add(T item)
         {
+            if (IsBatchFull)
+            {
+                _batches.Add(_currentBatchId, _batch);
+                _batch.Clear();
+                _currentBatchId = NextBatchId;
+            }
+
             _batch.Add(item);
             return _currentBatchId;
         }
+
+        private bool IsBatchFull => _batch.Count == _maxItemsPerBatch;
 
         private Guid NextBatchId => Guid.NewGuid();
     }

@@ -3,15 +3,10 @@ using System.Collections.Generic;
 
 namespace RequestBatcher.Lib
 {
-    public class Request
+    public class Batcher<T>
     {
-
-    }
-
-    public class Batcher
-    {
-        private List<Request> _batch = new List<Request>();
-        private Dictionary<Guid, List<Request>> _batches = new Dictionary<Guid, List<Request>>();
+        private List<T> _batch = new List<T>();
+        private Dictionary<Guid, List<T>> _batches = new Dictionary<Guid, List<T>>();
         private Guid _currentBatchId = Guid.NewGuid();
         private int _maxItemsPerBatch;
 
@@ -20,9 +15,9 @@ namespace RequestBatcher.Lib
             _maxItemsPerBatch = maxItemsPerBatch;
         }
 
-        public Guid Add(Request request)
+        public Guid Add(T item)
         {
-            _batch.Add(request);
+            _batch.Add(item);
             return _currentBatchId;
         }
 

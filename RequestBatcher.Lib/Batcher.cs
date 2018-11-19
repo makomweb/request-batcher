@@ -103,13 +103,13 @@ namespace RequestBatcher.Lib
 
     public class BatchProcessor<T>
     {
-        private readonly Dictionary<BatchRequest<T>, Task<BatchResponse>> _batches = new Dictionary<BatchRequest<T>, Task<BatchResponse>>();
+        private readonly Dictionary<BatchRequest<T>, Task<BatchResponse>> _tasks = new Dictionary<BatchRequest<T>, Task<BatchResponse>>();
 
         public void Enqueue(Batch<T> batch)
         {
             var r = new BatchRequest<T>(batch);
             var t = ProcessAsync(r);
-            _batches.Add(r, t);
+            _tasks.Add(r, t);
             //t.Start();
         }
 
@@ -121,7 +121,6 @@ namespace RequestBatcher.Lib
             return Task.Run(() => new BatchResponse());
 #else
             await Task.Delay(3000); // ms
-
             return new BatchResponse();
 #endif
         }
@@ -134,12 +133,12 @@ namespace RequestBatcher.Lib
 
         public Task<BatchResponse> Query(BatchRequest<T> request)
         {
-            return _batches[request];
+            return _tasks[request];
         }
 
         private BatchRequest<T> Request(Guid batchId)
         {
-            return _batches.Keys.First(request => request.BatchId == batchId);
+            return _tasks.Keys.First(request => request.BatchId == batchId);
         }
     }
 }

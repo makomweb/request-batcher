@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace RequestBatcher.Lib
 {
@@ -38,8 +40,8 @@ namespace RequestBatcher.Lib
 
     public class Batcher<T>
     {
-        private readonly Dictionary<Guid, Batch<T>> _batches = new Dictionary<Guid, Batch<T>>();
         private readonly int _maxItemsPerBatch;
+        private BatchProcessor<T> _processor = new BatchProcessor<T>();
         private Batch<T> _batch;
 
         public Batcher(int maxItemsPerBatch = 2)
@@ -52,30 +54,92 @@ namespace RequestBatcher.Lib
         {
             if (_batch.IsFull)
             {
-                _batches.Add(_batch.Id, _batch);
+                _processor.Enqueue(_batch);
                 _batch = new Batch<T>(_maxItemsPerBatch);
             }
 
             _batch.Add(item);
             return _batch.Id;
         }
-    }
 
-    public class BatchRequest
-    {
-
-    }
-
-    public class BatchResponse
-    {
-
-    }
-
-    public class BatchProcessor
-    {
-        public BatchResponse Process(BatchRequest request)
+        public BatchResponse Query(Guid batchId)
         {
+            var t = _processor.Query(batchId);
+
+            if (t.IsFaulted)
+            {
+                throw new Exception("Has faulted!", t.Exception);
+            }
+
+            if (t.IsCanceled)
+            {
+                throw new Exception("Was canceled.");
+            }
+
+            if (t.IsCompleted)
+            {
+                return t.Result;
+            }
+
+            throw new Exception($"Status is '{t.Status}'.");
+        }
+    }
+
+    public class BatchRequest<T>
+    {
+        private Batch<T> _batch;
+
+        public BatchRequest(Batch<T> batch)
+        {
+            _batch = batch;
+        }
+
+        public IEnumerable<T> Items => _batch.Items;
+
+        public Guid BatchId => _batch.Id;
+    }
+
+    public class BatchResponse { }
+
+    public class BatchProcessor<T>
+    {
+        private readonly Dictionary<BatchRequest<T>, Task<BatchResponse>> _batches = new Dictionary<BatchRequest<T>, Task<BatchResponse>>();
+
+        public void Enqueue(Batch<T> batch)
+        {
+            var r = new BatchRequest<T>(batch);
+            var t = ProcessAsync(r);
+            _batches.Add(r, t);
+            //t.Start();
+        }
+
+        private async Task<BatchResponse> ProcessAsync(BatchRequest<T> request)
+        {
+#if false
+            // TODO implement async processing!
+            return Task.FromResult(new BatchResponse());
+            return Task.Run(() => new BatchResponse());
+#else
+            await Task.Delay(3000); // ms
+
             return new BatchResponse();
+#endif
+        }
+
+        public Task<BatchResponse> Query(Guid batchId)
+        {
+            var r = Request(batchId);
+            return Query(r);
+        }
+
+        public Task<BatchResponse> Query(BatchRequest<T> request)
+        {
+            return _batches[request];
+        }
+
+        private BatchRequest<T> Request(Guid batchId)
+        {
+            return _batches.Keys.First(request => request.BatchId == batchId);
         }
     }
 }

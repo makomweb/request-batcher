@@ -131,7 +131,7 @@ namespace RequestBatcher.Lib
             return Query(r);
         }
 
-        public Task<BatchResponse> Query(BatchRequest<T> request)
+        private Task<BatchResponse> Query(BatchRequest<T> request)
         {
             return _tasks[request];
         }

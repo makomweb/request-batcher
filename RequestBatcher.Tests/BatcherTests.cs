@@ -35,14 +35,14 @@ namespace RequestBatcher.Tests
             var two = batcher.Add("two");
             var three = batcher.Add("three");
 
-            var execution = batcher.Query(one);
-            Assert.IsFalse(execution.IsCompleted, "Status should be 'not completed'!");
+            var batchExecution = batcher.Query(one);
+            Assert.IsFalse(batchExecution.IsCompleted, "Execution should not be completed!");
 
-            await execution.Task;
-            Assert.IsTrue(execution.IsCompleted, "Status should be 'completed' now!");
-            Assert.IsInstanceOf<BatchResponse<string>>(execution.Result, "Value should be of type 'BatchResponse'!");
+            await batchExecution.Task;
+            Assert.IsTrue(batchExecution.IsCompleted, "Execution should be completed!");
+            Assert.IsInstanceOf<BatchResponse<string>>(batchExecution.Result, "Result should be of type 'BatchResponse<string>'!");
 
-            var result = execution.Result as BatchResponse<string>;
+            var result = batchExecution.Result as BatchResponse<string>;
             Assert.AreEqual("one two", result.Value);
         }
 

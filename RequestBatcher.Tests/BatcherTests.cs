@@ -48,7 +48,7 @@ namespace RequestBatcher.Tests
         }
 
         [Test]
-        public async Task If_batch_is_NOT_full_quering_the_status_should_throw()
+        public void If_batch_is_NOT_full_quering_the_status_should_throw()
         {
             const int MAX_BATCH_CAPACITY = 3;
             var batcher = new SizedBatcher<string>(batch =>
@@ -117,7 +117,7 @@ namespace RequestBatcher.Tests
         }
 
         [Test]
-        public async Task If_batch_execution_fails_an_error_response_is_expected()
+        public void If_batch_execution_fails_an_error_response_is_expected()
         {
             const int MAX_BATCH_CAPACITY = 2;
             var batcher = new SizedBatcher<string>(_ =>

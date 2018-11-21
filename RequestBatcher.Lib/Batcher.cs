@@ -136,7 +136,7 @@ namespace RequestBatcher.Lib
             _batch = null;
 
             var batch = sender as Batch<T>;
-            _processor.Enqueue(batch);
+            _processor.StartProcessing(batch);
         }
 
         /// <summary>
@@ -271,7 +271,7 @@ namespace RequestBatcher.Lib
             _callback = callback;
         }
 
-        public void Enqueue(Batch<T> batch)
+        public void StartProcessing(Batch<T> batch)
         {
             var request = new BatchRequest<T>(batch);
             var task = ProcessAsync(request);

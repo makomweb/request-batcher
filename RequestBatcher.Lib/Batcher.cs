@@ -106,43 +106,38 @@ namespace RequestBatcher.Lib
 
     public class BatchProcessResult
     {
-        private readonly Task<BatchResponse> _task;
-
         public BatchProcessResult(Task<BatchResponse> task)
         {
-            _task = task;
+            Task = task;
         }
 
-        public bool IsCompleted => _task.IsCompleted;
+        public Task<BatchResponse> Task { get; private set; }
 
-        public TaskStatus Status => _task.Status;
+        public bool IsCompleted => Task.IsCompleted;
+
+        public TaskStatus Status => Task.Status;
 
         public BatchResponse Result
         {
             get
             {
-                if (_task.IsFaulted)
+                if (Task.IsFaulted)
                 {
-                    throw new Exception("Has faulted!", _task.Exception);
+                    throw new Exception("Has faulted!", Task.Exception);
                 }
 
-                if (_task.IsCanceled)
+                if (Task.IsCanceled)
                 {
                     throw new Exception("Was canceled.");
                 }
 
-                if (_task.IsCompleted)
+                if (Task.IsCompleted)
                 {
-                    return _task.Result;
+                    return Task.Result;
                 }
 
-                throw new Exception($"Status is '{_task.Status}'.");
+                throw new Exception($"Status is '{Task.Status}'.");
             }
-        }
-
-        public Task<BatchResponse> GetTask()
-        {
-            return _task;
         }
     }
 

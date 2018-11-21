@@ -25,7 +25,7 @@ namespace RequestBatcher.Lib
 
         public Guid Id { get; private set; } = Guid.NewGuid();
 
-        public abstract void Add(T item);
+        public abstract Guid Add(T item);
 
         public abstract bool IsFull { get; }
 
@@ -36,7 +36,7 @@ namespace RequestBatcher.Lib
             IsReady?.Invoke(this, EventArgs.Empty);
         }
 
-        protected void DoAdd(T item)
+        protected Guid DoAdd(T item)
         {
             if (IsFull)
             {
@@ -44,6 +44,8 @@ namespace RequestBatcher.Lib
             }
 
             _items.Add(item);
+
+            return Id;
         }
     }
 
@@ -58,14 +60,16 @@ namespace RequestBatcher.Lib
 
         public override bool IsFull => _maxSize == Items.Count();
 
-        public override void Add(T item)
+        public override Guid Add(T item)
         {
-            DoAdd(item);
+            var id = DoAdd(item);
 
             if (IsFull)
             {
                 RaiseIsReady();
             }
+
+            return id;
         }
     }
 
@@ -80,9 +84,9 @@ namespace RequestBatcher.Lib
 
         public override bool IsFull => _expires <= DateTime.Now;
 
-        public override void Add(T item)
+        public override Guid Add(T item)
         {
-            DoAdd(item);
+            return DoAdd(item);
         }
 
         private async void Initialize(TimeSpan timeWindow)
@@ -122,8 +126,7 @@ namespace RequestBatcher.Lib
                 _batch.IsReady += OnBatchIsReady;
             }
 
-            _batch.Add(item);
-            return _batch.Id;
+            return _batch.Add(item);
         }
 
         private void OnBatchIsReady(object sender, EventArgs e)

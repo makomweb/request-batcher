@@ -8,7 +8,7 @@ namespace RequestBatcher.Lib
     public class BatchIsFullException : Exception
     {
         public BatchIsFullException(Guid id)
-            : base($"The batch '{id}' batch is full") { }
+            : base($"The batch '{id}' is full") { }
     }
 
     public class Batch<T>

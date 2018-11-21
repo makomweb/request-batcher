@@ -248,7 +248,7 @@ namespace RequestBatcher.Lib
 
                 if (Task.IsCanceled)
                 {
-                    throw new Exception("Was canceled.");
+                    throw new Exception("Was canceled!");
                 }
 
                 if (Task.IsCompleted)
@@ -256,7 +256,7 @@ namespace RequestBatcher.Lib
                     return Task.Result;
                 }
 
-                throw new Exception($"Status is '{Task.Status}'.");
+                throw new Exception($"Status is '{Task.Status}!'");
             }
         }
     }

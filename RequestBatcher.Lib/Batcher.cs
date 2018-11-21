@@ -84,6 +84,19 @@ namespace RequestBatcher.Lib
         {
             DoAdd(item);
         }
+
+        private async void Initialize(TimeSpan timeWindow)
+        {
+            try
+            {
+                await Task.Delay(timeWindow);
+                RaiseIsReady();
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+        }
     }
 
     public abstract class Batcher<T>

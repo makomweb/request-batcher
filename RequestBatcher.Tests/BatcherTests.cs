@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using RequestBatcher.Lib;
+using System;
 using System.Threading.Tasks;
 
 namespace RequestBatcher.Tests
@@ -46,21 +47,28 @@ namespace RequestBatcher.Tests
             Assert.AreEqual("one two", result.Value);
         }
 
-        //[Test]
-        //public async Task If_time_window_expires_batch_should_be_processed()
-        //{
-        //    var batcher = new Batcher<string>(batch =>
-        //    {
-        //        var j = string.Join(" ", batch.Items);
-        //        return new BatchResponse<string>(j);
-        //    });
+        [Test]
+        public async Task If_time_window_is_not_expired_quering_the_status_should_throw()
+        {
+            var batcher = new TimeWindowedBatcher<string>(batch =>
+            {
+                var j = string.Join(" ", batch.Items);
+                return new BatchResponse<string>(j);
+            }, TimeSpan.FromSeconds(5));
 
-        //    var one = batcher.Add("one");
-        //    var two = batcher.Add("two");
+            var one = batcher.Add("one");
+            var two = batcher.Add("two");
 
-        //    await Task.Delay(2000); // ms
+            await Task.Delay(300); // ms
 
-        //    await
-        //}
+            try
+            {
+                var batchExecution = batcher.Query(one);
+                Assert.Fail("Quering the batch-execution should have thrown before!");
+            }
+            catch (BatchWaitingForProcessingException ex)
+            {
+            }
+        }
     }
 }

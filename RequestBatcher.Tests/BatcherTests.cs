@@ -78,16 +78,15 @@ namespace RequestBatcher.Tests
             {
                 var j = string.Join(" ", batch.Items);
                 return new BatchResponse<string>(j);
-            }, TimeSpan.FromSeconds(3));
+            }, TimeSpan.FromMilliseconds(300));
 
             var one = batcher.Add("one");
             var two = batcher.Add("two");
 
-            await Task.Delay(4000); // ms
-
-            var three = batcher.Add("three");
+            await Task.Delay(400); // ms
 
             var batchExecution = batcher.Query(one);
+            Assert.IsNotNull(batchExecution.Status);
         }
     }
 }

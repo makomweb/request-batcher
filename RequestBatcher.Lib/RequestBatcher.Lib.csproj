@@ -42,8 +42,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Batch.cs" />
     <Compile Include="Batcher.cs" />
+    <Compile Include="BatchExecution.cs" />
+    <Compile Include="BatchIsFullException.cs" />
+    <Compile Include="BatchProcessor.cs" />
+    <Compile Include="BatchRequest.cs" />
+    <Compile Include="BatchResponse.cs" />
+    <Compile Include="BatchWaitingForExecutionException.cs" />
+    <Compile Include="ExceptionBatchResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SizedBatch.cs" />
+    <Compile Include="SizedBatcher.cs" />
+    <Compile Include="SuccessBatchResponse.cs" />
+    <Compile Include="TimeWindowedBatch.cs" />
+    <Compile Include="TimeWindowedBatcher.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

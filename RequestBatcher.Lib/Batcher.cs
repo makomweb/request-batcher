@@ -69,14 +69,14 @@ namespace RequestBatcher.Lib
         }
 
         /// <summary>
-        /// Query the processing status of an item from a batch.
+        /// Get the execution object for a given batch ID.
         /// </summary>
         /// <param name="batchId">the id</param>
-        /// <returns>the result</returns>
-        public BatchProcessResult Query(Guid batchId)
+        /// <returns>the execution object</returns>
+        public BatchExecution Query(Guid batchId)
         {
             var t = _processor.Query(batchId);
-            return new BatchProcessResult(t);
+            return new BatchExecution(t);
         }
     }
 
@@ -104,9 +104,9 @@ namespace RequestBatcher.Lib
         public object Value { get; private set; } 
     }
 
-    public class BatchProcessResult
+    public class BatchExecution
     {
-        public BatchProcessResult(Task<BatchResponse> task)
+        public BatchExecution(Task<BatchResponse> task)
         {
             Task = task;
         }

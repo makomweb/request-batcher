@@ -39,7 +39,7 @@ namespace RequestBatcher.Tests
 
             var batchExecution = batcher.Query(one);
 
-            await batchExecution.Task;
+            await batchExecution.WaitForCompletion();
             Assert.IsTrue(batchExecution.IsCompleted, "Execution should be completed!");
             Assert.IsInstanceOf<SuccessBatchResponse<string>>(batchExecution.Result, "Result should be of type 'BatchResponse<string>'!");
 

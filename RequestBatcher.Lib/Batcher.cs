@@ -80,6 +80,7 @@ namespace RequestBatcher.Lib
         public TimeWindowedBatch(TimeSpan timeWindow)
         {
             _expires = DateTime.Now.Add(timeWindow);
+            Initialize(timeWindow);
         }
 
         public override bool IsFull => _expires <= DateTime.Now;
@@ -132,8 +133,7 @@ namespace RequestBatcher.Lib
         private void OnBatchIsReady(object sender, EventArgs e)
         {
             _batch.IsReady -= OnBatchIsReady;
-            _batch = CreateNewBatch();
-            _batch.IsReady += OnBatchIsReady;
+            _batch = null;
 
             var batch = sender as Batch<T>;
             _processor.Enqueue(batch);
@@ -146,7 +146,7 @@ namespace RequestBatcher.Lib
         /// <returns>the execution object</returns>
         public BatchExecution Query(Guid batchId)
         {
-            if (_batch.Id == batchId)
+            if (_batch != null && _batch.Id == batchId)
             {
                 throw new BatchWaitingForProcessingException(_batch.Id);
             }

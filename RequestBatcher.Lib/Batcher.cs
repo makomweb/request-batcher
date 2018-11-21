@@ -11,10 +11,10 @@ namespace RequestBatcher.Lib
             : base($"The batch '{batchId}' is full!") { }
     }
 
-    public class BatchWaitingForProcessingException : Exception
+    public class BatchWaitingForExecutionException : Exception
     {
-        public BatchWaitingForProcessingException(Guid batchId)
-            : base($"Batch '{batchId}' is waiting to be processed!") { }
+        public BatchWaitingForExecutionException(Guid batchId)
+            : base($"Batch '{batchId}' is waiting to be executed!") { }
     }
 
     public abstract class Batch<T>
@@ -148,7 +148,7 @@ namespace RequestBatcher.Lib
         {
             if (_batch != null && _batch.Id == batchId)
             {
-                throw new BatchWaitingForProcessingException(_batch.Id);
+                throw new BatchWaitingForExecutionException(_batch.Id);
             }
 
             var task = _processor.Query(batchId);

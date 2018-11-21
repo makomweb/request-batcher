@@ -65,7 +65,7 @@ namespace RequestBatcher.Tests
                 var batchExecution = batcher.Query(one);
                 Assert.Fail("Quering the batch-execution should have thrown before!");
             }
-            catch (BatchWaitingForProcessingException)
+            catch (BatchWaitingForExecutionException)
             {
                 // Just an exception of this type is expected.
             }
@@ -91,7 +91,7 @@ namespace RequestBatcher.Tests
                 var batchExecution = batcher.Query(one);
                 Assert.Fail("Quering the batch-execution should have thrown before!");
             }
-            catch (BatchWaitingForProcessingException)
+            catch (BatchWaitingForExecutionException)
             {
                 // Just an exception of this type is expected.
             }

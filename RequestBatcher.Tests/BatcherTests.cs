@@ -70,5 +70,24 @@ namespace RequestBatcher.Tests
             {
             }
         }
+
+        [Test]
+        public async Task If_time_window_is_expired_quering_the_status_should_succeed()
+        {
+            var batcher = new TimeWindowedBatcher<string>(batch =>
+            {
+                var j = string.Join(" ", batch.Items);
+                return new BatchResponse<string>(j);
+            }, TimeSpan.FromSeconds(3));
+
+            var one = batcher.Add("one");
+            var two = batcher.Add("two");
+
+            await Task.Delay(4000); // ms
+
+            var three = batcher.Add("three");
+
+            var batchExecution = batcher.Query(one);
+        }
     }
 }

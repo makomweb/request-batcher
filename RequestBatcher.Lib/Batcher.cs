@@ -51,6 +51,11 @@ namespace RequestBatcher.Lib
             _batch = new Batch<T>(_maxItemsPerBatch);
         }
 
+        /// <summary>
+        /// Put an item onto the batch in order to process it.
+        /// </summary>
+        /// <param name="item">the item</param>
+        /// <returns>ID which is used to query process status.</returns>
         public Guid Add(T item)
         {
             if (_batch.IsFull)
@@ -63,6 +68,11 @@ namespace RequestBatcher.Lib
             return _batch.Id;
         }
 
+        /// <summary>
+        /// Query the processing status of an item from a batch.
+        /// </summary>
+        /// <param name="batchId">the id</param>
+        /// <returns>the result</returns>
         public BatchProcessResult Query(Guid batchId)
         {
             var t = _processor.Query(batchId);

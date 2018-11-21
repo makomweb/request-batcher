@@ -204,14 +204,24 @@ namespace RequestBatcher.Lib
 
     public abstract class BatchResponse { }
 
-    public class BatchResponse<T> : BatchResponse
+    public class SuccessBatchResponse<T> : BatchResponse
     {
-        public BatchResponse(T value)
+        public SuccessBatchResponse(T value)
         {
             Value = value;
         }
 
         public T Value { get; private set; }
+    }
+
+    public class ExceptionBatchResponse : BatchResponse
+    {
+        public ExceptionBatchResponse(Exception innerException)
+        {
+            InnerException = innerException;
+        }
+
+        public Exception InnerException { get; }
     }
 
     public class BatchExecution
@@ -270,8 +280,14 @@ namespace RequestBatcher.Lib
 
         private async Task<BatchResponse> ProcessAsync(BatchRequest<T> request)
         {
-            await Task.Delay(2000); // ms
-            return await Task.Run(() => _callback(request));
+            try
+            {
+                return await Task.Run(() => _callback(request));
+            }
+            catch (Exception ex)
+            {
+                return new ExceptionBatchResponse(ex);
+            }
         }
 
         public Task<BatchResponse> Query(Guid batchId)

@@ -11,7 +11,7 @@ namespace RequestBatcher.Tests
         public void Two_subsequent_requests_should_have_the_same_id()
         {
             const int MAX_BATCH_CAPACITY = 2;
-            var batcher = new SizedBatcher<string>(_ => new BatchResponse<bool>(true), MAX_BATCH_CAPACITY);
+            var batcher = new SizedBatcher<string>(_ => new SuccessBatchResponse<bool>(true), MAX_BATCH_CAPACITY);
             var one = batcher.Add("one");
             var two = batcher.Add("two");
 
@@ -31,7 +31,7 @@ namespace RequestBatcher.Tests
             var batcher = new SizedBatcher<string>(batch =>
             {
                 var j = string.Join(" ", batch.Items);
-                return new BatchResponse<string>(j);
+                return new SuccessBatchResponse<string>(j);
             }, MAX_BATCH_CAPACITY);
 
             var one = batcher.Add("one");
@@ -41,9 +41,9 @@ namespace RequestBatcher.Tests
 
             await batchExecution.Task;
             Assert.IsTrue(batchExecution.IsCompleted, "Execution should be completed!");
-            Assert.IsInstanceOf<BatchResponse<string>>(batchExecution.Result, "Result should be of type 'BatchResponse<string>'!");
+            Assert.IsInstanceOf<SuccessBatchResponse<string>>(batchExecution.Result, "Result should be of type 'BatchResponse<string>'!");
 
-            var result = batchExecution.Result as BatchResponse<string>;
+            var result = batchExecution.Result as SuccessBatchResponse<string>;
             Assert.AreEqual("one two", result.Value);
         }
 
@@ -54,7 +54,7 @@ namespace RequestBatcher.Tests
             var batcher = new SizedBatcher<string>(batch =>
             {
                 var j = string.Join(" ", batch.Items);
-                return new BatchResponse<string>(j);
+                return new SuccessBatchResponse<string>(j);
             }, MAX_BATCH_CAPACITY);
 
             var one = batcher.Add("one");
@@ -78,7 +78,7 @@ namespace RequestBatcher.Tests
             var batcher = new TimeWindowedBatcher<string>(batch =>
             {
                 var j = string.Join(" ", batch.Items);
-                return new BatchResponse<string>(j);
+                return new SuccessBatchResponse<string>(j);
             }, MAX_BATCH_TIME_WINDOW);
 
             var one = batcher.Add("one");
@@ -104,7 +104,7 @@ namespace RequestBatcher.Tests
             var batcher = new TimeWindowedBatcher<string>(batch =>
             {
                 var j = string.Join(" ", batch.Items);
-                return new BatchResponse<string>(j);
+                return new SuccessBatchResponse<string>(j);
             }, MAX_BATCH_TIME_WINDOW);
 
             var one = batcher.Add("one");
@@ -113,7 +113,27 @@ namespace RequestBatcher.Tests
             await Task.Delay(400); // ms
 
             var batchExecution = batcher.Query(one);
-            Assert.AreEqual(TaskStatus.WaitingForActivation, batchExecution.Status, "Status should be 'waiting for execution'!");
+            Assert.IsTrue(batchExecution.IsCompleted, "Execution should be completed!");
+        }
+
+        [Test]
+        public async Task If_batch_execution_fails_an_error_response_is_expected()
+        {
+            const int MAX_BATCH_CAPACITY = 2;
+            var batcher = new SizedBatcher<string>(_ =>
+            {
+                throw new Exception("Execution has failed!");
+            }, MAX_BATCH_CAPACITY);
+
+            var one = batcher.Add("one");
+            var two = batcher.Add("two");
+            
+            var batchExecution = batcher.Query(one);
+            Assert.IsTrue(batchExecution.IsCompleted, "Execution should be completed!");
+            Assert.IsInstanceOf<ExceptionBatchResponse>(batchExecution.Result, "Result should be of type 'ExceptionBatchResponse'!");
+
+            var result = batchExecution.Result as ExceptionBatchResponse;
+            Assert.AreEqual("Execution has failed!", result.InnerException.Message);
         }
     }
 }

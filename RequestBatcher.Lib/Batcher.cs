@@ -41,12 +41,13 @@ namespace RequestBatcher.Lib
     public class Batcher<T>
     {
         private readonly int _maxItemsPerBatch;
-        private BatchProcessor<T> _processor = new BatchProcessor<T>();
+        private BatchProcessor<T> _processor;
         private Batch<T> _batch;
 
-        public Batcher(int maxItemsPerBatch = 2)
+        public Batcher(Func<BatchRequest<T>, BatchResponse> callback, int maxItemsPerBatch = 2)
         {
             _maxItemsPerBatch = maxItemsPerBatch;
+            _processor = new BatchProcessor<T>(callback);
             _batch = new Batch<T>(_maxItemsPerBatch);
         }
 
@@ -83,7 +84,15 @@ namespace RequestBatcher.Lib
         public Guid BatchId => _batch.Id;
     }
 
-    public class BatchResponse { }
+    public class BatchResponse
+    {
+        public BatchResponse(object value = null)
+        {
+            Value = value;
+        }
+
+        public object Value { get; private set; } 
+    }
 
     public class BatchProcessResult
     {
@@ -121,7 +130,7 @@ namespace RequestBatcher.Lib
             }
         }
 
-        public Task<BatchResponse> GetValueAsync()
+        public Task<BatchResponse> GeResponseAsync()
         {
             return _task;
         }
@@ -130,6 +139,12 @@ namespace RequestBatcher.Lib
     public class BatchProcessor<T>
     {
         private readonly Dictionary<BatchRequest<T>, Task<BatchResponse>> _tasks = new Dictionary<BatchRequest<T>, Task<BatchResponse>>();
+        private readonly Func<BatchRequest<T>, BatchResponse> _callback;
+
+        public BatchProcessor(Func<BatchRequest<T>, BatchResponse> callback)
+        {
+            _callback = callback;
+        }
 
         public void Enqueue(Batch<T> batch)
         {
@@ -140,14 +155,8 @@ namespace RequestBatcher.Lib
 
         private async Task<BatchResponse> ProcessAsync(BatchRequest<T> request)
         {
-#if false
-            // TODO implement async processing!
-            return Task.FromResult(new BatchResponse());
-            return Task.Run(() => new BatchResponse());
-#else
-            await Task.Delay(3000); // ms
-            return new BatchResponse();
-#endif
+            await Task.Delay(2000); // ms
+            return await Task.Run(() => _callback(request));
         }
 
         public Task<BatchResponse> Query(Guid batchId)

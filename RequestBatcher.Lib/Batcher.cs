@@ -119,16 +119,21 @@ namespace RequestBatcher.Lib
             if (_batch == null)
             {
                 _batch = CreateNewBatch();
-            }
-
-            if (_batch.IsFull)
-            {
-                _processor.Enqueue(_batch);
-                _batch = CreateNewBatch();
+                _batch.IsReady += OnBatchIsReady;
             }
 
             _batch.Add(item);
             return _batch.Id;
+        }
+
+        private void OnBatchIsReady(object sender, EventArgs e)
+        {
+            _batch.IsReady -= OnBatchIsReady;
+            _batch = CreateNewBatch();
+            _batch.IsReady += OnBatchIsReady;
+
+            var batch = sender as Batch<T>;
+            _processor.Enqueue(batch);
         }
 
         /// <summary>

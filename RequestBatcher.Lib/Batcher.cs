@@ -274,7 +274,7 @@ namespace RequestBatcher.Lib
         public void StartProcessing(Batch<T> batch)
         {
             var request = new BatchRequest<T>(batch);
-            var task = ProcessAsync(request);
+            var task = ProcessAsync(request); // Note: Completion of the task is not awaited here!
             _tasks.Add(request, task);
         }
 

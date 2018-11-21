@@ -46,7 +46,7 @@ namespace RequestBatcher.Lib
 
     public abstract class Batcher<T>
     {
-        private BatchProcessor<T> _processor;
+        private readonly BatchProcessor<T> _processor;
         private Batch<T> _batch;
 
         public Batcher(Func<BatchRequest<T>, BatchResponse> callback, int maxItemsPerBatch = 2)

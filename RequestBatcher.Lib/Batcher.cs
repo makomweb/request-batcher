@@ -45,6 +45,18 @@ namespace RequestBatcher.Lib
         public override bool IsFull => _maxSize == Items.Count();
     }
 
+    public class TimeWindowedBatch<T> : Batch<T>
+    {
+        private readonly DateTime _expires;
+
+        public TimeWindowedBatch(TimeSpan timeWindow)
+        {
+            _expires = DateTime.Now.Add(timeWindow);
+        }
+
+        public override bool IsFull => _expires <= DateTime.Now;
+    }
+
     public abstract class Batcher<T>
     {
         private readonly BatchProcessor<T> _processor;
@@ -104,6 +116,21 @@ namespace RequestBatcher.Lib
         protected override Batch<T> CreateNewBatch()
         {
             return new SizedBatch<T>(_maxItemsPerBatch);
+        }
+    }
+
+    public class TimeWindowedBatcher<T> : Batcher<T>
+    {
+        private readonly TimeSpan _timeWindow;
+
+        public TimeWindowedBatcher(Func<BatchRequest<T>, BatchResponse> callback, TimeSpan timeWindow) : base(callback)
+        {
+            _timeWindow = timeWindow;
+        }
+
+        protected override Batch<T> CreateNewBatch()
+        {
+            return new TimeWindowedBatch<T>(_timeWindow);
         }
     }
 

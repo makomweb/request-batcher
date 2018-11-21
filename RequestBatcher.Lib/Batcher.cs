@@ -94,14 +94,16 @@ namespace RequestBatcher.Lib
         public Guid BatchId => _batch.Id;
     }
 
-    public class BatchResponse
+    public abstract class BatchResponse { }
+
+    public class BatchResponse<T> : BatchResponse
     {
-        public BatchResponse(object value = null)
+        public BatchResponse(T value)
         {
             Value = value;
         }
 
-        public object Value { get; private set; } 
+        public T Value { get; private set; }
     }
 
     public class BatchExecution

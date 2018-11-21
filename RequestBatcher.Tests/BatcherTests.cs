@@ -9,7 +9,7 @@ namespace RequestBatcher.Tests
         [Test]
         public void Two_subsequent_requests_should_have_the_same_id()
         {
-            var batcher = new Batcher<string>(_ => new BatchResponse());
+            var batcher = new Batcher<string>(_ => new BatchResponse<bool>(true));
             var one = batcher.Add("one");
             var two = batcher.Add("two");
 
@@ -28,20 +28,22 @@ namespace RequestBatcher.Tests
             var batcher = new Batcher<string>(batch =>
             {
                 var j = string.Join(" ", batch.Items);
-                return new BatchResponse(j);
+                return new BatchResponse<string>(j);
             });
 
             var one = batcher.Add("one");
             var two = batcher.Add("two");
             var three = batcher.Add("three");
 
-            var result = batcher.Query(one);
-            Assert.IsFalse(result.IsCompleted, "Status should be 'not completed'!");
+            var execution = batcher.Query(one);
+            Assert.IsFalse(execution.IsCompleted, "Status should be 'not completed'!");
 
-            await result.Task;
-            Assert.IsTrue(result.IsCompleted, "Status should be 'completed' now!");
-            Assert.IsInstanceOf<BatchResponse>(result.Result, "Value should be of type 'BatchResponse'!");
-            Assert.AreEqual("one two", result.Result.Value);
+            await execution.Task;
+            Assert.IsTrue(execution.IsCompleted, "Status should be 'completed' now!");
+            Assert.IsInstanceOf<BatchResponse<string>>(execution.Result, "Value should be of type 'BatchResponse'!");
+
+            var result = execution.Result as BatchResponse<string>;
+            Assert.AreEqual("one two", result.Value);
         }
     }
 }

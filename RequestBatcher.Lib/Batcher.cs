@@ -11,15 +11,9 @@ namespace RequestBatcher.Lib
             : base($"The batch '{id}' is full") { }
     }
 
-    public class Batch<T>
+    public abstract class Batch<T>
     {
         private readonly List<T> _items = new List<T>();
-        private readonly int _maxSize;
-
-        public Batch(int maxSize)
-        {
-            _maxSize = maxSize;
-        }
 
         public IEnumerable<T> Items => _items;
 
@@ -35,20 +29,29 @@ namespace RequestBatcher.Lib
             _items.Add(item);
         }
 
-        public bool IsFull => _maxSize == _items.Count;
+        public abstract bool IsFull { get; }
     }
 
-    public class Batcher<T>
+    public class SizedBatch<T> : Batch<T>
     {
-        private readonly int _maxItemsPerBatch;
+        private readonly int _maxSize;
+
+        public SizedBatch(int maxSize)
+        {
+            _maxSize = maxSize;
+        }
+
+        public override bool IsFull => _maxSize == Items.Count();
+    }
+
+    public abstract class Batcher<T>
+    {
         private BatchProcessor<T> _processor;
         private Batch<T> _batch;
 
         public Batcher(Func<BatchRequest<T>, BatchResponse> callback, int maxItemsPerBatch = 2)
         {
-            _maxItemsPerBatch = maxItemsPerBatch;
             _processor = new BatchProcessor<T>(callback);
-            _batch = new Batch<T>(_maxItemsPerBatch);
         }
 
         /// <summary>
@@ -58,10 +61,15 @@ namespace RequestBatcher.Lib
         /// <returns>ID which is used to query process status.</returns>
         public Guid Add(T item)
         {
+            if (_batch == null)
+            {
+                _batch = CreateNewBatch();
+            }
+
             if (_batch.IsFull)
             {
                 _processor.Enqueue(_batch);
-                _batch = new Batch<T>(_maxItemsPerBatch);
+                _batch = CreateNewBatch();
             }
 
             _batch.Add(item);
@@ -77,6 +85,24 @@ namespace RequestBatcher.Lib
         {
             var t = _processor.Query(batchId);
             return new BatchExecution(t);
+        }
+
+        protected abstract Batch<T> CreateNewBatch();
+    }
+
+    public class SizedBatcher<T> : Batcher<T>
+    {
+        private readonly int _maxItemsPerBatch;
+
+        public SizedBatcher(Func<BatchRequest<T>, BatchResponse> callback, int maxItemsPerBatch) : base(callback)
+        {
+            _maxItemsPerBatch = maxItemsPerBatch;
+
+        }
+
+        protected override Batch<T> CreateNewBatch()
+        {
+            return new SizedBatch<T>(_maxItemsPerBatch);
         }
     }
 

@@ -9,7 +9,7 @@ namespace RequestBatcher.Tests
         [Test]
         public void Two_subsequent_requests_should_have_the_same_id()
         {
-            var batcher = new Batcher<string>(_ => new BatchResponse<bool>(true));
+            var batcher = new SizedBatcher<string>(_ => new BatchResponse<bool>(true), 2);
             var one = batcher.Add("one");
             var two = batcher.Add("two");
 
@@ -25,11 +25,11 @@ namespace RequestBatcher.Tests
         [Test]
         public async Task If_batch_is_full_it_should_be_processed()
         {
-            var batcher = new Batcher<string>(batch =>
+            var batcher = new SizedBatcher<string>(batch =>
             {
                 var j = string.Join(" ", batch.Items);
                 return new BatchResponse<string>(j);
-            });
+            }, 2);
 
             var one = batcher.Add("one");
             var two = batcher.Add("two");
@@ -45,5 +45,22 @@ namespace RequestBatcher.Tests
             var result = execution.Result as BatchResponse<string>;
             Assert.AreEqual("one two", result.Value);
         }
+
+        //[Test]
+        //public async Task If_time_window_expires_batch_should_be_processed()
+        //{
+        //    var batcher = new Batcher<string>(batch =>
+        //    {
+        //        var j = string.Join(" ", batch.Items);
+        //        return new BatchResponse<string>(j);
+        //    });
+
+        //    var one = batcher.Add("one");
+        //    var two = batcher.Add("two");
+
+        //    await Task.Delay(2000); // ms
+
+        //    await
+        //}
     }
 }

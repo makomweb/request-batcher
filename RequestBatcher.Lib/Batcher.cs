@@ -68,10 +68,10 @@ namespace RequestBatcher.Lib
         }
 
         /// <summary>
-        /// Put an item onto the batch in order to process it.
+        /// Put a work item onto the batch in order to process it.
         /// </summary>
-        /// <param name="item">the item</param>
-        /// <returns>ID which is used to query process status.</returns>
+        /// <param name="item">the work item</param>
+        /// <returns>ID which is used to query execution status.</returns>
         public Guid Add(T item)
         {
             if (_batch == null)

@@ -41,7 +41,7 @@ namespace RequestBatcher.Tests
 
             await batchExecution.WaitForCompletion();
             Assert.IsTrue(batchExecution.IsCompleted, "Execution should be completed!");
-            Assert.IsInstanceOf<SuccessBatchResponse<string>>(batchExecution.Result, "Result should be of type 'BatchResponse<string>'!");
+            Assert.IsInstanceOf<SuccessBatchResponse<string>>(batchExecution.Result, "Result should be of type 'SuccessBatchResponse<string>'!");
 
             var result = batchExecution.Result as SuccessBatchResponse<string>;
             Assert.AreEqual("one two", result.Value);

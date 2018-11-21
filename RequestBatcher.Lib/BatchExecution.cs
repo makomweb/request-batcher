@@ -3,39 +3,64 @@ using System.Threading.Tasks;
 
 namespace RequestBatcher.Lib
 {
+    /// <summary>
+    /// An instance of this class carries execution information about a batch request.
+    /// </summary>
     public class BatchExecution
     {
+        private Task<BatchResponse> _task;
+
+        /// <summary>
+        /// Initialized an instance of this class.
+        /// </summary>
+        /// <param name="task">Task object which is responsible for performing the asynchronous request-response-work.</param>
         public BatchExecution(Task<BatchResponse> task)
         {
-            Task = task;
+            _task = task;
         }
 
-        public Task<BatchResponse> Task { get; private set; }
+        /// <summary>
+        /// Return the task itself in order to enable awaiting completion.
+        /// </summary>
+        /// <returns>The async task</returns>
+        public Task WaitForCompletion()
+        {
+            return _task;
+        }
 
-        public bool IsCompleted => Task.IsCompleted;
+        /// <summary>
+        /// Check if the execution was completed.
+        /// </summary>
+        public bool IsCompleted => _task.IsCompleted;
 
-        public TaskStatus Status => Task.Status;
+        /// <summary>
+        /// Get the status of execution.
+        /// </summary>
+        public TaskStatus Status => _task.Status;
 
+        /// <summary>
+        /// Get the result of this execution.
+        /// </summary>
         public BatchResponse Result
         {
             get
             {
-                if (Task.IsFaulted)
+                if (_task.IsFaulted)
                 {
-                    throw new Exception("Has faulted!", Task.Exception);
+                    throw new Exception("Has faulted!", _task.Exception);
                 }
 
-                if (Task.IsCanceled)
+                if (_task.IsCanceled)
                 {
                     throw new Exception("Was canceled!");
                 }
 
-                if (Task.IsCompleted)
+                if (_task.IsCompleted)
                 {
-                    return Task.Result;
+                    return _task.Result;
                 }
 
-                throw new Exception($"Status is '{Task.Status}!'");
+                throw new Exception($"Status is '{_task.Status}!'");
             }
         }
     }

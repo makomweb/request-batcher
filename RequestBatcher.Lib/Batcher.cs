@@ -83,8 +83,8 @@ namespace RequestBatcher.Lib
         /// <returns>the execution object</returns>
         public BatchExecution Query(Guid batchId)
         {
-            var t = _processor.Query(batchId);
-            return new BatchExecution(t);
+            var task = _processor.Query(batchId);
+            return new BatchExecution(task);
         }
 
         protected abstract Batch<T> CreateNewBatch();
@@ -181,9 +181,9 @@ namespace RequestBatcher.Lib
 
         public void Enqueue(Batch<T> batch)
         {
-            var r = new BatchRequest<T>(batch);
-            var t = ProcessAsync(r);
-            _tasks.Add(r, t);
+            var request = new BatchRequest<T>(batch);
+            var task = ProcessAsync(request);
+            _tasks.Add(request, task);
         }
 
         private async Task<BatchResponse> ProcessAsync(BatchRequest<T> request)
@@ -194,8 +194,8 @@ namespace RequestBatcher.Lib
 
         public Task<BatchResponse> Query(Guid batchId)
         {
-            var r = Request(batchId);
-            return Query(r);
+            var request = Request(batchId);
+            return Query(request);
         }
 
         private Task<BatchResponse> Query(BatchRequest<T> request)

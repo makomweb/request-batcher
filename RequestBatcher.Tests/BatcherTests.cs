@@ -38,10 +38,10 @@ namespace RequestBatcher.Tests
             var result = batcher.Query(one);
             Assert.IsFalse(result.IsCompleted, "Status should be 'not completed'!");
 
-            await result.GeResponseAsync();
+            await result.GetTask();
             Assert.IsTrue(result.IsCompleted, "Status should be 'completed' now!");
-            Assert.IsInstanceOf<BatchResponse>(result.Value, "Value should be of type 'BatchResponse'!");
-            Assert.AreEqual("one two", result.Value.Value);
+            Assert.IsInstanceOf<BatchResponse>(result.Result, "Value should be of type 'BatchResponse'!");
+            Assert.AreEqual("one two", result.Result.Value);
         }
     }
 }

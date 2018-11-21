@@ -117,7 +117,7 @@ namespace RequestBatcher.Lib
 
         public TaskStatus Status => _task.Status;
 
-        public BatchResponse Value
+        public BatchResponse Result
         {
             get
             {
@@ -140,7 +140,7 @@ namespace RequestBatcher.Lib
             }
         }
 
-        public Task<BatchResponse> GeResponseAsync()
+        public Task<BatchResponse> GetTask()
         {
             return _task;
         }
